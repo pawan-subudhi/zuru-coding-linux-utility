@@ -2,14 +2,7 @@ import argparse
 import json
 import datetime
 
-def format_date_time_from_timestamp(timestamp):
-    """
-    Format the date and time based on the timestamp.
-    """
-    date_object = datetime.datetime.fromtimestamp(timestamp)
-    return date_object.strftime("%b %d %H:%M")
-
-def ls_command(file_info, show_all=False, long_format=False, reverse_order=False):
+def ls_command(file_info, options):
     """
     Perform the ls command based on the provided data structure and options for the given JSON data.
 
@@ -18,19 +11,22 @@ def ls_command(file_info, show_all=False, long_format=False, reverse_order=False
     :param long_format: Flag to print in long format i.e <permission size last_modification file/folder>"
     :param reverse_order: Flag to include all files and directories (including hidden ones)
     """
-    file_info_to_print = sorted(file_info['contents'], key=lambda x: x["name"], reverse=reverse_order)
+    file_key = "time_modified" if options.sort_by_time else "name"
+    file_info_to_print = sorted(file_info["contents"], key=lambda x: x[file_key], reverse=options.reverse)
 
     for item in file_info_to_print:
         name = item['name']
-        if not show_all and name.startswith('.'):
+        if not options.show_all and name.startswith('.'):
             continue
 
-        permissions = item['permissions']
-        size = item['size']
-        time_modified = item['time_modified']
-        formatted_time = format_date_time_from_timestamp(time_modified)
+        permissions = item.get("permissions", "")
+        size = item.get("size", 0)
+        time_modified = item.get("time_modified", 0)
+        name = item.get("name", "")
 
-        if long_format:
+        formatted_time = datetime.datetime.fromtimestamp(time_modified).strftime("%b %d %H:%M")
+
+        if options.long_format:
             print(f"{permissions} {size} {formatted_time} {name}")
         else:
             print(name, end=' ')
@@ -43,6 +39,7 @@ def main():
     parser.add_argument('-A', '--show-all', action='store_true', help="Show all files and directories")
     parser.add_argument('-l', '--long-format', action='store_true', help="Print in long format i.e <permission size last_modification file/folder>")
     parser.add_argument("-r", "--reverse", dest="reverse", action="store_true", help="Print in revserse order with long format i.e <permission size last_modification file/folder>")
+    parser.add_argument("-t", "--time", dest="sort_by_time", action="store_true", help="sort by time_modified")
 
     args = parser.parse_args()
 
@@ -51,7 +48,7 @@ def main():
         structure_data = json.load(file)
 
     # Execute ls command
-    ls_command(structure_data, show_all=args.show_all, long_format=args.long_format, reverse_order=args.reverse)
+    ls_command(structure_data, args)
 
 if __name__ == "__main__":
     main()
