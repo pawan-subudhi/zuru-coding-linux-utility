@@ -1,12 +1,41 @@
-import argparse
+from docopt import docopt
 import json
 import datetime
 import sys
 
 def is_directory(permissions):
+    """
+    Check if the given permissions indicate a directory.
+
+    :param permissions: String representing file permissions.
+    :return: True if the permissions indicate a directory, False otherwise.
+    """
     return permissions.startswith('d')
 
+
+def convert_bytes_to_human_readable(size_in_bytes):
+    """
+    Convert a size in bytes to human-readable format with appropriate suffixes (B, KB, MB, GB, TB).
+
+    :param size_in_bytes: Size in bytes to be converted.
+    :return: Human-readable string representation of the size.
+    """
+    suffixes = ['B', 'KB', 'MB', 'GB', 'TB']
+    index = 0
+    while size_in_bytes >= 1024 and index < len(suffixes) - 1:
+        size_in_bytes /= 1024.0
+        index += 1
+    return f"{size_in_bytes:.1f}{suffixes[index]}"
+
+
 def filter_assets(file_info, filter_option):
+    """
+    Filter the contents of a file_info dictionary based on the specified filter_option.
+
+    :param file_info: Dictionary containing information about files and directories.
+    :param filter_option: Filter option ('file' or 'dir').
+    :return: Dictionary with filtered contents based on the filter option.
+    """
     contents = file_info["contents"]
     filtered_contents = None
 
@@ -20,23 +49,36 @@ def filter_assets(file_info, filter_option):
 
     return {"contents": filtered_contents}
 
+
 def ls_command(file_info, options):
     """
-    perform the ls command based on the provided data structure and options for the given json data.
+    Perform the ls command based on the provided data structure and options for the given JSON data.
+
+    :param file_info: Dictionary representing the file structure with metadata.
+    :param options: Namespace object containing command-line options (parsed arguments).
+
+    This function processes the ls command with the specified options and prints the output.
+    The file_info parameter should contain a dictionary with a "contents" key, representing the
+    directory structure. The options parameter holds information about how the ls command should be executed.
+
+    The function handles options such as showing all files and directories, printing in long format,
+    reversing the order, sorting by time_modified, and filtering based on file or directory, printing sizes in human-readable format.
+
+    :return: None
     """
     if "contents" not in file_info:
         raise ValueError("invalid file_info structure. 'contents' key not found.")
 
     filtered_file_info = file_info.copy()
-    if options.filter_option:
-        filtered_file_info.update(filter_assets(file_info, options.filter_option))
+    if options['--filter']:
+        filtered_file_info.update(filter_assets(file_info, options['--filter']))
 
-    file_key = "time_modified" if options.sort_by_time else "name"
-    file_info_to_print = sorted(file_info["contents"], key=lambda x: x[file_key], reverse=options.reverse)
+    file_key = "time_modified" if options['--time'] else "name"
+    file_info_to_print = sorted(filtered_file_info["contents"], key=lambda x: x[file_key], reverse=options['--reverse'])
 
     for item in file_info_to_print:
         name = item['name']
-        if not options.show_all and name.startswith('.'):
+        if not options['--show-all'] and name.startswith('.'):
             continue
 
         permissions = item.get("permissions", "")
@@ -46,27 +88,38 @@ def ls_command(file_info, options):
 
         formatted_time = datetime.datetime.fromtimestamp(time_modified).strftime("%b %d %H:%M")
 
-        if options.long_format:
-            print(f"{permissions} {size} {formatted_time} {name}")
+        if options['--long-format']:
+            if options['--human-readable']:
+                human_readable_size = convert_bytes_to_human_readable(size)
+                print(f"{permissions} {human_readable_size} {formatted_time} {name}")
+            else:
+                print(f"{permissions} {size} {formatted_time} {name}")
         else:
             print(name, end=' ')
     else:
         print("\n")
 
+
 def main():
-    # argument parser setup
-    parser = argparse.ArgumentParser(description="Python linux utility ls command")
+    # usage string for docopt
+    usage = """
+    Python linux utility ls command
 
-    parser.add_argument('-a', '--show-all', action='store_true', help="show all files and directories")
-    parser.add_argument('-l', '--long-format', action='store_true', help="print in long format i.e <permission size last_modification file/folder>")
-    parser.add_argument("-r", "--reverse", dest="reverse", action="store_true", help="print in revserse order with long format i.e <permission size last_modification file/folder>")
-    parser.add_argument("-t", "--time", dest="sort_by_time", action="store_true", help="sort by time_modified")
-    # With choices we can bound the choices but we have handled explicitly
-    parser.add_argument("--filter", dest="filter_option",
-                        # choices=['file', 'dir'],
-                        help="filter output based on 'file' or 'dir'")
+    Usage:
+      pyls.py [-A] [-l] [-r] [-t] [--filter=<option>] [-h]
 
-    args = parser.parse_args()
+    Options:
+      -A, --show-all          Show all files and directories
+      -l, --long-format       Print in long format i.e <permission size last_modification file/folder>
+      -r, --reverse           Print in reverse order with long format i.e <permission size last_modification file/folder>
+      -t, --time              Sort by time_modified
+      --filter=<option>       Filter output based on 'file' or 'dir'
+      -h --human-readable     Show human-readable sizes
+      --help                  Show this help message and exit
+    """
+
+    # parse arguments using docopt
+    args = docopt(usage)
 
     # read the json data from the file
     with open('structure.json', 'r') as file:
@@ -74,6 +127,7 @@ def main():
 
     # execute ls command
     ls_command(structure_data, args)
+
 
 if __name__ == "__main__":
     main()
