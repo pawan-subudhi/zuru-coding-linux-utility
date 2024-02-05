@@ -2,31 +2,31 @@
   "name": "interpreter",
   "size": 4096,
   "time_modified": 1699957865,
-  "permissions": "-rw-r--r--",
+  "permissions": "drw-r--r--",
   "contents": [
     {
       "name": ".gitignore",
       "size": 8911,
       "time_modified": 1699941437,
-      "permissions": "drwxr-xr-x"
+      "permissions": "-rwxr-xr-x"
     },
     {
       "name": "LICENSE",
       "size": 1071,
       "time_modified": 1699941437,
-      "permissions": "drwxr-xr-x"
+      "permissions": "-rwxr-xr-x"
     },
     {
       "name": "README.md",
       "size": 83,
       "time_modified": 1699941437,
-      "permissions": "drwxr-xr-x"
+      "permissions": "-rwxr-xr-x"
     },
     {
       "name": "ast",
       "size": 4096,
       "time_modified": 1699957739,
-      "permissions": "-rw-r--r--",
+      "permissions": "drw-r--r--",
       "contents": [
         {
           "name": "go.mod",
@@ -38,7 +38,7 @@
           "name": "ast.go",
           "size": 837,
           "time_modified": 1699957719,
-          "permissions": "drwxr-xr-x"
+          "permissions": "-rwxr-xr-x"
         }
       ]
     },
@@ -46,7 +46,7 @@
       "name": "go.mod",
       "size": 60,
       "time_modified": 1699950073,
-      "permissions": "drwxr-xr-x"
+      "permissions": "-rwxr-xr-x"
     },
     {
       "name": "lexer",
@@ -58,7 +58,7 @@
           "name": "lexer_test.go",
           "size": 1729,
           "time_modified": 1699955126,
-          "permissions": "drwxr-xr-x"
+          "permissions": "-rwxr-xr-x"
         },
         {
           "name": "go.mod",
@@ -70,7 +70,7 @@
           "name": "lexer.go",
           "size": 2886,
           "time_modified": 1699955487,
-          "permissions": "drwxr-xr-x"
+          "permissions": "-rwxr-xr-x"
         }
       ]
     },
@@ -90,7 +90,7 @@
           "name": "parser_test.go",
           "size": 1342,
           "time_modified": 1700205662,
-          "permissions": "drwxr-xr-x"
+          "permissions": "-rwxr-xr-x"
         },
         {
           "name": "parser.go",
@@ -102,7 +102,7 @@
           "name": "go.mod",
           "size": 533,
           "time_modified": 1699958000,
-          "permissions": "drwxr-xr-x"
+          "permissions": "-rwxr-xr-x"
         }
       ]
     },
@@ -110,7 +110,7 @@
       "name": "token",
       "size": 4096,
       "time_modified": 1699954070,
-      "permissions": "-rw-r--r--",
+      "permissions": "drw-r--r--",
       "contents": [
         {
           "name": "token.go",
@@ -122,7 +122,7 @@
           "name": "go.mod",
           "size": 66,
           "time_modified": 1699944730,
-          "permissions": "drwxr-xr-x"
+          "permissions": "-rwxr-xr-x"
         }
       ]
     }

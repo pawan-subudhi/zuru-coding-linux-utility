@@ -50,6 +50,22 @@ def filter_assets(file_info, filter_option):
     return {"contents": filtered_contents}
 
 
+def path_exists_recursive(path, current_info):
+    path_parts = path.split("/")
+
+    for part in path_parts:
+        if not part:
+            continue
+
+        part_info = next((item for item in current_info.get("contents", []) if item['name'] == part), None)
+        if not part_info:
+            return False
+
+        current_info = part_info
+
+    return True
+
+
 def ls_command(file_info, options):
     """
     Perform the ls command based on the provided data structure and options for the given JSON data.
@@ -64,8 +80,11 @@ def ls_command(file_info, options):
     The function handles options such as showing all files and directories, printing in long format,
     reversing the order, sorting by time_modified, and filtering based on file or directory, printing sizes in human-readable format.
 
+    If the input path is a file, it prints the details of that file. If it is a directory, it prints the contents of that directory.
+
     :return: None
     """
+    file_info_to_print = []
     if "contents" not in file_info:
         raise ValueError("invalid file_info structure. 'contents' key not found.")
 
@@ -73,8 +92,37 @@ def ls_command(file_info, options):
     if options['--filter']:
         filtered_file_info.update(filter_assets(file_info, options['--filter']))
 
+    path = options['<path>']
+    if not path:
+        file_info_to_print = filtered_file_info["contents"]
+    else:
+        path_parts = path.split("/")
+        current_info = filtered_file_info
+
+        for part in path_parts:
+            if not part:
+                continue
+
+            part_info = next((item for item in current_info.get("contents", []) if item['name'] == part), None)
+            if part_info and is_directory(part_info.get('permissions', '')):
+                current_info = part_info
+            else:
+                if part == path_parts[-1]:
+                    # Check if it's a file or directory
+                    if is_directory(part_info.get('permissions', '')):
+                        file_info_to_print = part_info.get("contents", [])
+                    else:
+                        file_info_to_print = [part_info]
+                else:
+                    print(f"error: {part} is not a valid directory or file in the path.")
+                    sys.exit(1)
+
+    if not file_info_to_print:
+        file_info_to_print = current_info.get("contents", [])
+
+    # Sort file_info_to_print after the loop
     file_key = "time_modified" if options['--time'] else "name"
-    file_info_to_print = sorted(filtered_file_info["contents"], key=lambda x: x[file_key], reverse=options['--reverse'])
+    file_info_to_print = sorted(file_info_to_print, key=lambda x: x[file_key], reverse=options['--reverse'])
 
     for item in file_info_to_print:
         name = item['name']
@@ -106,7 +154,7 @@ def main():
     Python linux utility ls command
 
     Usage:
-      pyls.py [-A] [-l] [-r] [-t] [--filter=<option>] [-h]
+      pyls.py [-A] [-l] [-r] [-t] [--filter=<option>] [-h] [<path>]
 
     Options:
       -A, --show-all          Show all files and directories
@@ -124,6 +172,12 @@ def main():
     # read the json data from the file
     with open('structure.json', 'r') as file:
         structure_data = json.load(file)
+
+    # Check if the provided path exists recursively
+    path = args['<path>']
+    if path and not path_exists_recursive(path, structure_data):
+        print(f"error: cannot access '{path}': No such file or directory")
+        sys.exit(1)
 
     # execute ls command
     ls_command(structure_data, args)
