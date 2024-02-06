@@ -2,8 +2,9 @@ from docopt import docopt
 import json
 import datetime
 import sys
+from typing import Dict, List, Optional, Union
 
-def is_directory(permissions):
+def is_directory(permissions: str) -> bool:
     """
     Check if the given permissions indicate a directory.
 
@@ -13,7 +14,7 @@ def is_directory(permissions):
     return permissions.startswith('d')
 
 
-def convert_bytes_to_human_readable(size_in_bytes):
+def convert_bytes_to_human_readable(size_in_bytes: float) -> str:
     """
     Convert a size in bytes to human-readable format with appropriate suffixes (B, KB, MB, GB, TB).
 
@@ -28,7 +29,7 @@ def convert_bytes_to_human_readable(size_in_bytes):
     return f"{size_in_bytes:.1f}{suffixes[index]}"
 
 
-def filter_assets(file_info, filter_option):
+def filter_assets(file_info: Dict[str, Union[str, List[Dict[str, Union[str, int]]]]], filter_option: str) -> Dict[str, List[Dict[str, Union[str, int]]]]:
     """
     Filter the contents of a file_info dictionary based on the specified filter_option.
 
@@ -50,7 +51,7 @@ def filter_assets(file_info, filter_option):
     return {"contents": filtered_contents}
 
 
-def path_exists_recursive(path, current_info):
+def path_exists_recursive(path: str, current_info: Dict[str, Union[str, List[Dict[str, Union[str, int]]]]]) -> bool:
     path_parts = path.split("/")
 
     for part in path_parts:
@@ -66,7 +67,7 @@ def path_exists_recursive(path, current_info):
     return True
 
 
-def print_file_info(item, options):
+def print_file_info(item: Dict[str, Union[str, int]], options: Dict[str, Union[bool, str]]) -> None:
     """
     Print file information based on the specified options.
 
@@ -93,7 +94,7 @@ def print_file_info(item, options):
         print(name, end=' ')
 
 
-def ls_command(file_info, options):
+def ls_command(file_info: Dict[str, Union[str, List[Dict[str, Union[str, int]]]]], options: Dict[str, Union[bool, str]]) -> None:
     """
     Perform the ls command based on the provided data structure and options for the given JSON data.
 
@@ -157,7 +158,7 @@ def ls_command(file_info, options):
         print("\n")
 
 
-def main():
+def main() -> None:
     # usage string for docopt
     usage = """
     Python linux utility ls command
@@ -176,11 +177,11 @@ def main():
     """
 
     # parse arguments using docopt
-    args = docopt(usage)
+    args: Dict[str, Union[bool, str, Optional[List[str]]]] = docopt(usage)
 
     # read the json data from the file
     with open('structure.json', 'r') as file:
-        structure_data = json.load(file)
+        structure_data: Dict[str, Union[str, List[Dict[str, Union[str, int]]]]] = json.load(file)
 
     # Check if the provided path exists recursively
     path = args['<path>']
