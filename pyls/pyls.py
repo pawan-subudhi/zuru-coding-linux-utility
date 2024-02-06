@@ -1,3 +1,4 @@
+from pathlib import Path
 from docopt import docopt
 import json
 import datetime
@@ -179,8 +180,13 @@ def main() -> None:
     # parse arguments using docopt
     args: Dict[str, Union[bool, str, Optional[List[str]]]] = docopt(usage)
 
+    # Get the absolute path to the script's directory
+    script_directory = Path(__file__).resolve().parent.parent
+    # Construct the path to the structure.json file
+    structure_json_path = script_directory / 'structure.json'
+
     # read the json data from the file
-    with open('structure.json', 'r') as file:
+    with open(structure_json_path, 'r') as file:
         structure_data: Dict[str, Union[str, List[Dict[str, Union[str, int]]]]] = json.load(file)
 
     # Check if the provided path exists recursively

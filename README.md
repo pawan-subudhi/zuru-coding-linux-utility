@@ -26,6 +26,23 @@ pyls.py is a Python implementation of the ls command, providing a simple and cus
    pip install -r requirements.txt
    ```
 
+4. Install poetry:
+
+   ```bash
+   poetry install
+   ```
+
+5. Open a poetry shell:
+
+   ```bash
+   poetry shell
+   ```
+
+6. Run the pyls as system command:
+   ```bash
+   pyls
+   ```
+
 ## Usage
 
 ### Basic Usage

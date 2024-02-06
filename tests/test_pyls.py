@@ -1,9 +1,14 @@
 import json
+from pathlib import Path
 import pytest
-from pyls import ls_command
+from pyls.pyls import ls_command
 
 def load_structure_data():
-    with open('structure.json', 'r') as file:
+    # Get the absolute path to the script's directory
+    script_directory = Path(__file__).resolve().parent.parent
+    # Construct the path to the structure.json file
+    structure_json_path = script_directory / 'structure.json'
+    with open(structure_json_path, 'r') as file:
         return json.load(file)
 
 # Define a fixture to provide sample data for testing
