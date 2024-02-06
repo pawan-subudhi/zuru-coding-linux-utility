@@ -66,6 +66,33 @@ def path_exists_recursive(path, current_info):
     return True
 
 
+def print_file_info(item, options):
+    """
+    Print file information based on the specified options.
+
+    :param item: Dictionary representing file or directory information.
+    :param options: Namespace object containing command-line options.
+    :return: None
+    """
+    name = item['name']
+    if not options['--show-all'] and name.startswith('.'):
+        return
+
+    permissions = item.get("permissions", "")
+    size = item.get("size", 0)
+    time_modified = item.get("time_modified", 0)
+    formatted_time = datetime.datetime.fromtimestamp(time_modified).strftime("%b %d %H:%M")
+
+    if options['--long-format']:
+        if options['--human-readable']:
+            human_readable_size = convert_bytes_to_human_readable(size)
+            print(f"{permissions} {human_readable_size} {formatted_time} {name}")
+        else:
+            print(f"{permissions} {size} {formatted_time} {name}")
+    else:
+        print(name, end=' ')
+
+
 def ls_command(file_info, options):
     """
     Perform the ls command based on the provided data structure and options for the given JSON data.
@@ -125,25 +152,7 @@ def ls_command(file_info, options):
     file_info_to_print = sorted(file_info_to_print, key=lambda x: x[file_key], reverse=options['--reverse'])
 
     for item in file_info_to_print:
-        name = item['name']
-        if not options['--show-all'] and name.startswith('.'):
-            continue
-
-        permissions = item.get("permissions", "")
-        size = item.get("size", 0)
-        time_modified = item.get("time_modified", 0)
-        name = item.get("name", "")
-
-        formatted_time = datetime.datetime.fromtimestamp(time_modified).strftime("%b %d %H:%M")
-
-        if options['--long-format']:
-            if options['--human-readable']:
-                human_readable_size = convert_bytes_to_human_readable(size)
-                print(f"{permissions} {human_readable_size} {formatted_time} {name}")
-            else:
-                print(f"{permissions} {size} {formatted_time} {name}")
-        else:
-            print(name, end=' ')
+        print_file_info(item, options)
     else:
         print("\n")
 
